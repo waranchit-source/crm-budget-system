@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Budget System</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #f3f4f6; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+        
+        .auth-container { max-width: 400px; margin: 100px auto; }
+        .form-group { margin-bottom: 15px; position: relative; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .password-toggle { position: absolute; right: 10px; top: 32px; cursor: pointer; color: #666; font-size: 12px; font-weight: bold; }
+        
+        .btn { width: 100%; padding: 10px; background-color: #0d9488; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .btn:hover { background-color: #0f766e; }
+        .btn-outline { background-color: transparent; border: 1px solid #0d9488; color: #0d9488; }
+        .btn-outline:hover { background-color: #f0fdfa; }
+        .btn-small { width: auto; padding: 5px 15px; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .profile-item { background: #f8fafc; padding: 15px; border-radius: 6px; border-left: 4px solid #0d9488; }
+        .profile-item span { display: block; font-size: 12px; color: #64748b; }
+        .profile-item strong { font-size: 18px; }
+
+        .filter-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .filter-group select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8fafc; font-weight: bold; }
+        
+        .hidden { display: none; }
+        #loader { text-align: center; margin: 20px 0; color: #0d9488; font-weight: bold; }
+        .lang-switch { cursor: pointer; color: #0d9488; font-weight: bold; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div style="text-align: right; margin-bottom: 10px;">
+            <span class="lang-switch" onclick="toggleLanguage()">Switch to Thai</span>
+        </div>
+
+        <div id="authSection" class="auth-container card">
+            <h2 id="authTitle" style="text-align: center;">Login</h2>
+            <div id="authError" style="color: red; text-align: center; margin-bottom: 10px; font-size: 14px;"></div>
+            
+            <div class="form-group">
+                <label id="lblEmail">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label id="lblPassword">Password</label>
+                <input type="password" id="password" required>
+                <span class="password-toggle" onclick="togglePassword()">SHOW</span>
+            </div>
+            
+            <div class="checkbox-group" id="rememberGroup">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe" id="lblRemember">Remember me</label>
+            </div>
+
+            <button class="btn" id="btnLogin" onclick="handleLogin()">Login</button>
+            <button class="btn btn-outline" id="btnRegisterMode" onclick="switchAuthMode()">Need an account? Register</button>
+            <button class="btn hidden" id="btnRegister" onclick="handleRegister()">Register</button>
+            <button class="btn btn-outline hidden" id="btnLoginMode" onclick="switchAuthMode()">Back to Login</button>
+        </div>
+
+        <div id="dashboardSection" class="hidden">
+            <div class="nav-bar">
+                <h2 id="dashTitle">CRM Dashboard</h2>
+                <button class="btn btn-outline btn-small" id="btnLogout" onclick="handleLogout()">Logout</button>
+            </div>
+
+            <div class="card">
+                <h3 id="profileTitle">Member Profile</h3>
+                <div class="profile-grid">
+                    <div class="profile-item"><span id="plName">Name</span><strong id="pName">-</strong></div>
+                    <div class="profile-item"><span id="plPhone">Phone</span><strong id="pPhone">-</strong></div>
+                    <div class="profile-item"><span id="plBudget">Total Budget</span><strong id="pBudget">-</strong></div>
+                    <div class="profile-item"><span id="plUsed">Amount Used</span><strong id="pUsed">-</strong></div>
+                    <div class="profile-item"><span id="plEmail">Email</span><strong id="pEmail">-</strong></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 id="historyTitle">Transaction History</h3>
+                <div class="filter-group">
+                    <select id="filterMonth" onchange="renderTable()">
+                        <option value="all" id="optMonthAll">All Months</option>
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                    <select id="filterYear" onchange="renderTable()">
+                        <option value="all" id="optYearAll">All Years</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+
+                <div id="loader" class="hidden">Loading data...</div>
+                
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th id="thDate">Date</th>
+                            <th id="thType">Type</th>
+                            <th id="thReason">Reason</th>
+                            <th id="thAmount">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzS6Y6Uw0gWRJA5fabM7C2C61dL1YZ5nfUR0GZpHtkAjQHCjnpE_7dScce_hFaad86e/exec"; 
+
+        let isLoginMode = true;
+        let currentLang = 'en';
+        let allTransactions = [];
+
+        const translations = {
+            en: {
+                switchLang: "Switch to Thai",
+                loginTitle: "Login",
+                registerTitle: "Register",
+                lblEmail: "Email",
+                lblPassword: "Password",
+                lblRemember: "Remember me",
+                btnLogin: "Login",
+                btnRegisterMode: "Need an account? Register",
+                btnRegister: "Register",
+                btnLoginMode: "Back to Login",
+                dashTitle: "CRM Dashboard",
+                btnLogout: "Logout",
+                profileTitle: "Member Profile",
+                plName: "Name",
+                plPhone: "Phone",
+                plBudget: "Total Budget",
+                plUsed: "Amount Used",
+                plEmail: "Email",
+                historyTitle: "Transaction History",
+                optMonthAll: "All Months",
+                optYearAll: "All Years",
+                thDate: "Date",
+                thType: "Type",
+                thReason: "Reason",
+                thAmount: "Amount",
+                loading: "Loading data...",
+                noData: "No transactions found.",
+                pwdShow: "SHOW",
+                pwdHide: "HIDE"
+            },
+            th: {
+                switchLang: "เปลี่ยนเป็นภาษาอังกฤษ",
+                loginTitle: "เข้าสู่ระบบ",
+                registerTitle: "สมัครสมาชิก",
+                lblEmail: "อีเมล",
+                lblPassword: "รหัสผ่าน",
+                lblRemember: "จดจำการเข้าสู่ระบบ",
+                btnLogin: "เข้าสู่ระบบ",
+                btnRegisterMode: "ยังไม่มีบัญชี? สมัครสมาชิก",
+                btnRegister: "สมัครสมาชิก",
+                btnLoginMode: "กลับไปหน้าเข้าสู่ระบบ",
+                dashTitle: "แดชบอร์ดระบบ CRM",
+                btnLogout: "ออกจากระบบ",
+                profileTitle: "ข้อมูลสมาชิก",
+                plName: "ชื่อสมาชิก",
+                plPhone: "เบอร์โทรศัพท์",
+                plBudget: "งบประมาณทั้งหมด",
+                plUsed: "งบประมาณที่ใช้ไป",
+                plEmail: "อีเมล",
+                historyTitle: "ประวัติการใช้งาน",
+                optMonthAll: "ทุกเดือน",
+                optYearAll: "ทุกปี",
+                thDate: "วันที่",
+                thType: "ประเภท",
+                thReason: "เหตุผล",
+                thAmount: "จำนวน",
+                loading: "กำลังโหลดข้อมูล...",
+                noData: "ไม่พบประวัติการทำรายการ",
+                pwdShow: "แสดง",
+                pwdHide: "ซ่อน"
+            }
+        };
+
+        window.onload = function() {
+            checkRememberMe();
+            setInitialFilters();
+        };
+
+        function setInitialFilters() {
+            const now = new Date();
+            document.getElementById('filterMonth').value = now.getMonth();
+            document.getElementById('filterYear').value = now.getFullYear();
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'th' : 'en';
+            const t = translations[currentLang];
+            
+            document.querySelector('.lang-switch').innerText = t.switchLang;
+            document.getElementById('authTitle').innerText = isLoginMode ? t.loginTitle : t.registerTitle;
+            document.getElementById('lblEmail').innerText = t.lblEmail;
+            document.getElementById('lblPassword').innerText = t.lblPassword;
+            document.getElementById('lblRemember').innerText = t.lblRemember;
+            document.getElementById('btnLogin').innerText = t.btnLogin;
+            document.getElementById('btnRegisterMode').innerText = t.btnRegisterMode;
+            document.getElementById('btnRegister').innerText = t.btnRegister;
+            document.getElementById('btnLoginMode').innerText = t.btnLoginMode;
+            document.getElementById('dashTitle').innerText = t.dashTitle;
+            document.getElementById('btnLogout').innerText = t.btnLogout;
+            document.getElementById('profileTitle').innerText = t.profileTitle;
+            document.getElementById('plName').innerText = t.plName;
+            document.getElementById('plPhone').innerText = t.plPhone;
+            document.getElementById('plBudget').innerText = t.plBudget;
+            document.getElementById('plUsed').innerText = t.plUsed;
+            document.getElementById('plEmail').innerText = t.plEmail;
+            document.getElementById('historyTitle').innerText = t.historyTitle;
+            document.getElementById('optMonthAll').innerText = t.optMonthAll;
+            document.getElementById('optYearAll').innerText = t.optYearAll;
+            document.getElementById('thDate').innerText = t.thDate;
+            document.getElementById('thType').innerText = t.thType;
+            document.getElementById('thReason').innerText = t.thReason;
+            document.getElementById('thAmount').innerText = t.thAmount;
+            document.getElementById('loader').innerText = t.loading;
+
+            const pwdToggle = document.querySelector('.password-toggle');
+            const pwdInput = document.getElementById('password');
+            pwdToggle.innerText = pwdInput.type === "password" ? t.pwdShow : t.pwdHide;
+
+            if(allTransactions.length > 0) renderTable();
+        }
+
+        function togglePassword() {
+            const pwdInput = document.getElementById('password');
+            const pwdToggle = document.querySelector('.password-toggle');
+            const t = translations[currentLang];
+            
+            if (pwdInput.type === "password") {
+                pwdInput.type = "text";
+                pwdToggle.innerText = t.pwdHide;
+            } else {
+                pwdInput.type = "password";
+                pwdToggle.innerText = t.pwdShow;
+            }
+        }
+
+        function switchAuthMode() {
+            isLoginMode = !isLoginMode;
+            const t = translations[currentLang];
+            document.getElementById('authTitle').innerText = isLoginMode ? t.loginTitle : t.registerTitle;
+            document.getElementById('btnLogin').classList.toggle('hidden');
+            document.getElementById('btnRegisterMode').classList.toggle('hidden');
+            document.getElementById('btnRegister').classList.toggle('hidden');
+            document.getElementById('btnLoginMode').classList.toggle('hidden');
+            document.getElementById('rememberGroup').classList.toggle('hidden');
+            document.getElementById('authError').innerText = "";
+        }
+
+        function checkRememberMe() {
+            const savedEmail = localStorage.getItem('crm_email');
+            const savedPwd = localStorage.getItem('crm_pwd');
+            if (savedEmail && savedPwd) {
+                document.getElementById('email').value = savedEmail;
+                document.getElementById('password').value = savedPwd;
+                document.getElementById('rememberMe').checked = true;
+                handleLogin();
+            }
+        }
+
+        function showMessage(msg) {
+            document.getElementById('authError').innerText = msg;
+        }
+
+        async function sendRequest(action, data) {
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: action, data: data }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+                });
+                return await response.json();
+            } catch (error) {
+                return { status: "error", message: "Network Error" };
+            }
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) return showMessage("Please fill all fields.");
+
+            showMessage("Registering...");
+            const res = await sendRequest("register", { email, password });
+            
+            if (res.status === "success") {
+                showMessage("Registration successful! Please login.");
+                setTimeout(switchAuthMode, 1500);
+            } else {
+                showMessage(res.message);
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('rememberMe').checked;
+            
+            if (!email || !password) return showMessage("Please fill all fields.");
+
+            showMessage("Logging in...");
+            const res = await sendRequest("login", { email, password });
+            
+            if (res.status === "success") {
+                if (remember) {
+                    localStorage.setItem('crm_email', email);
+                    localStorage.setItem('crm_pwd', password);
+                } else {
+                    localStorage.removeItem('crm_email');
+                    localStorage.removeItem('crm_pwd');
+                }
+                loadDashboard(email);
+            } else {
+                showMessage(res.message);
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('crm_email');
+            localStorage.removeItem('crm_pwd');
+            document.getElementById('email').value = "";
+            document.getElementById('password').value = "";
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+        }
+
+        async function loadDashboard(email) {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('tableBody').innerHTML = "";
+
+            const res = await sendRequest("getDashboard", { email: email });
+            document.getElementById('loader').classList.add('hidden');
+
+            if (res.status === "success" && res.data) {
+                const p = res.data.profile;
+                document.getElementById('pName').innerText = p.name || "-";
+                document.getElementById('pPhone').innerText = p.phone || "-";
+                document.getElementById('pBudget').innerText = p.budget ? Number(p.budget).toLocaleString() : "-";
+                document.getElementById('pUsed').innerText = p.used ? Number(p.used).toLocaleString() : "-";
+                document.getElementById('pEmail').innerText = p.email || "-";
+
+                allTransactions = res.data.transactions || [];
+                renderTable();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const monthFilter = document.getElementById('filterMonth').value;
+            const yearFilter = document.getElementById('filterYear').value;
+            const t = translations[currentLang];
+            
+            tbody.innerHTML = "";
+
+            const filteredData = allTransactions.filter(item => {
+                if (!item.date) return false;
+                const dateObj = new Date(item.date);
+                if (isNaN(dateObj)) return false;
+
+                const matchMonth = monthFilter === "all" || dateObj.getMonth().toString() === monthFilter;
+                const matchYear = yearFilter === "all" || dateObj.getFullYear().toString() === yearFilter;
+                return matchMonth && matchYear;
+            });
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">${t.noData}</td></tr>`;
+                return;
+            }
+
+            filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            filteredData.forEach(item => {
+                const dateObj = new Date(item.date);
+                const dateStr = dateObj.toLocaleDateString(currentLang === 'th' ? 'th-TH' : 'en-GB', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit'
+                });
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${item.type || '-'}</td>
+                    <td>${item.reason || '-'}</td>
+                    <td>${item.amount ? Number(item.amount).toLocaleString() : '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
