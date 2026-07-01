@@ -200,6 +200,19 @@
                 <div class="glass section-card mb-2">
                     <h3 class="mb-1" id="titleChart">Budget Usage Overview</h3>
                     <div class="filter-row">
+                        <select id="adminChartMonth" class="form-control" onchange="renderChart()">
+                            <option value="all" id="optChartMonthAll">All Months</option>
+                            <option value="0">January</option><option value="1">February</option>
+                            <option value="2">March</option><option value="3">April</option>
+                            <option value="4">May</option><option value="5">June</option>
+                            <option value="6">July</option><option value="7">August</option>
+                            <option value="8">September</option><option value="9">October</option>
+                            <option value="10">November</option><option value="11">December</option>
+                        </select>
+                        <select id="adminChartYear" class="form-control" onchange="renderChart()">
+                            <option value="all" id="optChartYearAll">All Years</option>
+                            <option value="2026">2026</option><option value="2025">2025</option>
+                        </select>
                         <select id="adminChartTeam" class="form-control" onchange="renderChart()">
                             <option value="all" id="optChartTeamAll">All Teams</option>
                         </select>
@@ -259,6 +272,8 @@
         let currentUserEmail = "";
         let budgetChartInstance = null;
 
+        const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
         const langData = {
             en: {
                 login: "Login", register: "Register", email: "Email", pwd: "Password", remember: "Remember me",
@@ -285,6 +300,7 @@
         };
 
         window.onload = () => {
+            if(window.innerWidth > 768) document.getElementById('sidebar').classList.add('active');
             const savedE = localStorage.getItem('crm_e');
             const savedP = localStorage.getItem('crm_p');
             if(savedE && savedP) {
@@ -308,6 +324,10 @@
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
+            
+            resetFiltersToCurrentMonth();
+            if(tabId === 'userTab') renderHistory();
+            if(tabId === 'adminTab') { renderAdminTable(); renderChart(); }
         }
 
         function toggleLanguage() {
@@ -338,8 +358,16 @@
             document.getElementById('lblPUsed').innerText = d.plUsed;
             document.getElementById('lblPTeam').innerText = d.plTeam;
             document.getElementById('titleHistory').innerText = d.hisTitle;
+            
             document.getElementById('optMonthAll').innerText = d.allM;
             document.getElementById('optYearAll').innerText = d.allY;
+            document.getElementById('optChartMonthAll').innerText = d.allM;
+            document.getElementById('optChartYearAll').innerText = d.allY;
+            document.getElementById('optChartTeamAll').innerText = d.allT;
+            document.getElementById('optAdMonthAll').innerText = d.allM;
+            document.getElementById('optAdYearAll').innerText = d.allY;
+            document.getElementById('optAdTeamAll').innerText = d.allT;
+
             document.getElementById('thDate').innerText = d.thDate;
             document.getElementById('thName').innerText = d.thName;
             document.getElementById('thPhone').innerText = d.thPhone;
@@ -352,13 +380,9 @@
             document.getElementById('thAdUsed').innerText = d.thAdUsed;
             document.getElementById('thAdStatus').innerText = d.thAdStatus;
             document.getElementById('thAdTeam').innerText = d.thAdTeam;
-            document.getElementById('optChartTeamAll').innerText = d.allT;
-            document.getElementById('optAdMonthAll').innerText = d.allM;
-            document.getElementById('optAdYearAll').innerText = d.allY;
-            document.getElementById('optAdTeamAll').innerText = d.allT;
 
             if(allTransactions.length) renderHistory();
-            if(adminData.users.length) renderAdminTable();
+            if(adminData.users.length) { renderAdminTable(); renderChart(); }
         }
 
         function togglePassword() {
@@ -422,11 +446,37 @@
             const dStr = langData[currentLang];
             chartSel.innerHTML = `<option value="all" id="optChartTeamAll">${dStr.allT}</option>`;
             tblSel.innerHTML = `<option value="all" id="optAdTeamAll">${dStr.allT}</option>`;
-            
             teamList.forEach(t => {
                 chartSel.innerHTML += `<option value="${t}">${t}</option>`;
                 tblSel.innerHTML += `<option value="${t}">${t}</option>`;
             });
+        }
+
+        function resetFiltersToCurrentMonth() {
+            const now = new Date();
+            const m = now.getMonth().toString();
+            const y = now.getFullYear().toString();
+            
+            document.getElementById('filterMonth').value = m;
+            document.getElementById('filterYear').value = y;
+            document.getElementById('adminChartMonth').value = m;
+            document.getElementById('adminChartYear').value = y;
+            document.getElementById('adminTableMonth').value = m;
+            document.getElementById('adminTableYear').value = y;
+        }
+
+        function isMatchMonthTag(monthTag, mFilter, yFilter) {
+            if (!monthTag) return false;
+            let mMatch = true; let yMatch = true;
+            if (mFilter !== "all") {
+                const mStr = shortMonths[parseInt(mFilter)];
+                mMatch = monthTag.startsWith(mStr);
+            }
+            if (yFilter !== "all") {
+                const yStr = yFilter.substring(2);
+                yMatch = monthTag.endsWith(yStr);
+            }
+            return mMatch && yMatch;
         }
 
         async function loadApp(email, role) {
@@ -449,17 +499,12 @@
                 
                 allTransactions = res.data.transactions || [];
                 
-                const now = new Date();
-                document.getElementById('filterMonth').value = now.getMonth().toString();
-                document.getElementById('filterYear').value = now.getFullYear().toString();
-                
+                resetFiltersToCurrentMonth();
                 renderHistory();
 
                 if(res.data.role === "Admin" && res.data.adminStats) {
                     document.getElementById('adminMenuBtn').classList.remove('hidden');
                     adminData = res.data.adminStats;
-                    document.getElementById('adminTableMonth').value = now.getMonth().toString();
-                    document.getElementById('adminTableYear').value = now.getFullYear().toString();
                     renderAdminTable();
                     renderChart();
                 }
@@ -475,13 +520,10 @@
             let totalUsed = 0;
 
             const filtered = allTransactions.filter(item => {
-                const dateObj = new Date(item.date);
-                if(isNaN(dateObj)) return false;
-                const mMatch = mFilter === "all" || dateObj.getMonth().toString() === mFilter;
-                const yMatch = yFilter === "all" || dateObj.getFullYear().toString() === yFilter;
-                if(mMatch && yMatch) totalUsed += Number(item.points || 0);
-                return mMatch && yMatch;
-            }).sort((a,b) => new Date(b.date) - new Date(a.date));
+                const match = isMatchMonthTag(item.monthTag, mFilter, yFilter);
+                if(match) totalUsed += Number(item.points || 0);
+                return match;
+            }).sort((a,b) => a.sortValue - b.sortValue); 
 
             document.getElementById('pUsed').innerText = totalUsed.toLocaleString();
 
@@ -491,10 +533,8 @@
             }
 
             filtered.forEach(i => {
-                const dObj = new Date(i.date);
-                const formatD = dObj.toLocaleDateString(currentLang==='th'?'th-TH':'en-GB', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
                 tbody.innerHTML += `<tr>
-                    <td>${formatD}</td><td>${i.name||'-'}</td><td>${i.phone||'-'}</td>
+                    <td>${i.displayDate}</td><td>${i.name||'-'}</td><td>${i.phone||'-'}</td>
                     <td style="color:var(--accent-1); font-weight:bold;">${i.points?Number(i.points).toLocaleString():'-'}</td>
                     <td>${i.branch||'-'}</td>
                 </tr>`;
@@ -514,12 +554,8 @@
 
                 let monthUsed = 0;
                 adminData.allTransactions.forEach(t => {
-                    if (t.email === u.email) {
-                        const dObj = new Date(t.date);
-                        if(isNaN(dObj)) return;
-                        const mMatch = mFilter === "all" || dObj.getMonth().toString() === mFilter;
-                        const yMatch = yFilter === "all" || dObj.getFullYear().toString() === yFilter;
-                        if(mMatch && yMatch) monthUsed += Number(t.points || 0);
+                    if (t.email === u.email && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
+                        monthUsed += Number(t.points || 0);
                     }
                 });
 
@@ -563,6 +599,8 @@
         }
 
         function renderChart() {
+            const mFilter = document.getElementById('adminChartMonth').value;
+            const yFilter = document.getElementById('adminChartYear').value;
             const tFilter = document.getElementById('adminChartTeam').value;
             const ctx = document.getElementById('budgetChart').getContext('2d');
             if(budgetChartInstance) budgetChartInstance.destroy();
@@ -578,7 +616,9 @@
                 budgetLine.push(u.budget);
                 let totalUsed = 0;
                 adminData.allTransactions.forEach(t => {
-                    if(t.email === u.email) totalUsed += Number(t.points || 0);
+                    if(t.email === u.email && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
+                        totalUsed += Number(t.points || 0);
+                    }
                 });
                 usedBars.push(totalUsed);
             });
