@@ -20,65 +20,36 @@
 
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         
-        body { 
-            background: radial-gradient(circle at top left, #1a1b26, var(--bg-color)); 
-            color: var(--text-main); 
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        body { background: radial-gradient(circle at top left, #1a1b26, var(--bg-color)); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
-        /* Glassmorphism Classes */
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
 
-        /* Layout & Sidebar */
         .app-container { display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: -260px;
-            top: 0;
-            z-index: 100;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-        }
-        .sidebar.active { left: 0; }
-        .sidebar-brand { font-size: 24px; font-weight: 700; margin-bottom: 40px; text-align: center; background: -webkit-linear-gradient(45deg, var(--accent-2), var(--accent-1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .menu-item { padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; transition: 0.3s; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 12px;}
+        .sidebar { width: 80px; height: 100vh; position: fixed; top: 0; left: 0; z-index: 100; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; padding: 20px 10px; overflow-x: hidden; }
+        .sidebar.active { width: 260px; padding: 20px; }
+        
+        .sidebar-brand { font-size: 24px; font-weight: 700; margin-bottom: 40px; text-align: center; white-space: nowrap; opacity: 0; transition: 0.2s; background: -webkit-linear-gradient(45deg, var(--accent-2), var(--accent-1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar.active .sidebar-brand { opacity: 1; }
+        
+        .menu-item { padding: 15px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; transition: 0.3s; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 15px; white-space: nowrap; }
         .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .menu-item .icon { font-size: 20px; min-width: 24px; text-align: center; }
+        .menu-item .text { opacity: 0; transition: 0.2s; pointer-events: none; }
+        .sidebar.active .menu-item .text { opacity: 1; pointer-events: auto; }
         
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 20px 40px;
-            height: 100vh;
-            overflow-y: auto;
-            transition: 0.4s;
-            width: 100%;
-        }
-        .main-content.shifted { margin-left: 260px; }
+        .main-content { flex: 1; padding: 20px 40px; height: 100vh; overflow-y: auto; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-left: 80px; width: calc(100% - 80px); }
+        .main-content.shifted { margin-left: 260px; width: calc(100% - 260px); }
 
-        /* Topbar */
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .hamburger { font-size: 24px; cursor: pointer; background: none; border: none; color: white; }
+        .hamburger { font-size: 20px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
         
-        /* Language Toggle */
         .lang-toggle { display: flex; align-items: center; background: rgba(255,255,255,0.1); border-radius: 30px; padding: 4px; cursor: pointer; width: 80px; position: relative;}
         .lang-pill { background: linear-gradient(45deg, var(--accent-2), var(--accent-1)); border-radius: 20px; color: white; padding: 4px 10px; font-size: 12px; font-weight: bold; position: absolute; left: 4px; transition: 0.3s; width: 36px; text-align: center;}
         .lang-text { width: 100%; display: flex; justify-content: space-between; padding: 0 10px; font-size: 12px; font-weight: bold; color: var(--text-muted); pointer-events: none;}
         .lang-toggle.th-active .lang-pill { transform: translateX(36px); }
 
-        /* Auth Container */
         .auth-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: absolute; top: 0; left: 0; z-index: 50; }
         .auth-card { width: 100%; max-width: 400px; padding: 40px 30px; }
         .form-group { margin-bottom: 20px; position: relative; }
@@ -87,25 +58,19 @@
         .form-control:focus { border-color: var(--accent-1); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
         .pwd-toggle { position: absolute; right: 15px; top: 38px; font-size: 12px; cursor: pointer; color: var(--accent-1); font-weight: bold; }
 
-        /* Buttons */
-        .btn-neon { 
-            width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; color: white; cursor: pointer;
-            background: linear-gradient(45deg, var(--accent-2), var(--accent-1)); background-size: 200% auto; transition: 0.5s; margin-bottom: 15px;
-        }
+        .btn-neon { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; color: white; cursor: pointer; background: linear-gradient(45deg, var(--accent-2), var(--accent-1)); background-size: 200% auto; transition: 0.5s; margin-bottom: 15px; }
         .btn-neon:hover { background-position: right center; box-shadow: 0 0 20px rgba(254, 9, 121, 0.4); }
         .btn-outline { background: transparent; border: 1px solid var(--glass-border); color: var(--text-muted); }
         .btn-outline:hover { background: rgba(255,255,255,0.05); color: white; }
         
-        /* Dashboard Cards */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .info-card { padding: 20px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;}
         .info-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%); pointer-events: none;}
         .info-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
         .info-value { font-size: 22px; font-weight: 700; word-break: break-word;}
 
-        /* Tables & Filters */
         .section-card { padding: 25px; margin-bottom: 30px; overflow-x: auto;}
-        .filter-row { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
+        .filter-row { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;}
         select.form-control { width: auto; min-width: 150px; cursor: pointer;}
         
         table { width: 100%; border-collapse: collapse; min-width: 700px;}
@@ -116,20 +81,19 @@
         .tag-exceed { background: rgba(254, 9, 121, 0.2); color: #fe0979; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;}
         .tag-safe { background: rgba(0, 242, 254, 0.2); color: #00f2fe; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;}
 
-        /* Utilities */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
         .mb-1 { margin-bottom: 10px; }
         .mb-2 { margin-bottom: 20px; }
         #loader { text-align: center; padding: 40px; color: var(--accent-1); font-weight: bold; letter-spacing: 2px;}
 
-        /* Chart Container */
         .chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px;}
 
         @media (max-width: 768px) {
-            .main-content.shifted { margin-left: 0; }
-            .main-content { padding: 15px; }
-            .dashboard-grid { grid-template-columns: 1fr; }
+            .sidebar { width: 0; padding: 0; }
+            .sidebar.active { width: 260px; padding: 20px; }
+            .main-content { margin-left: 0; width: 100%; padding: 15px; }
+            .main-content.shifted { margin-left: 0; width: 100%; }
         }
     </style>
 </head>
@@ -164,25 +128,23 @@
     </div>
 
     <div id="appSection" class="app-container hidden">
-        
         <div id="sidebar" class="sidebar glass">
             <div class="sidebar-brand">CRM SPACE</div>
             <div class="menu-item active" onclick="switchTab('userTab', this)">
-                <span>📊</span> <span id="menuDash">Dashboard</span>
+                <span class="icon">📊</span> <span class="text" id="menuDash">Dashboard</span>
             </div>
             <div id="adminMenuBtn" class="menu-item hidden" onclick="switchTab('adminTab', this)">
-                <span>🛡️</span> <span id="menuAdmin">Admin Panel</span>
+                <span class="icon">🛡️</span> <span class="text" id="menuAdmin">Admin Panel</span>
             </div>
             <div style="flex-grow: 1;"></div>
             <div class="menu-item" style="color: var(--accent-2);" onclick="handleLogout()">
-                <span>🚪</span> <span id="menuLogout">Logout</span>
+                <span class="icon">🚪</span> <span class="text" id="menuLogout">Logout</span>
             </div>
         </div>
 
         <div class="main-content" id="mainContent">
             <div class="topbar">
                 <button class="hamburger" onclick="toggleSidebar()">☰</button>
-                
                 <div class="lang-toggle" onclick="toggleLanguage()" id="langToggleBtn">
                     <div class="lang-text"><span>EN</span><span>TH</span></div>
                     <div class="lang-pill" id="langPill">EN</div>
@@ -237,6 +199,11 @@
             <div id="adminTab" class="hidden">
                 <div class="glass section-card mb-2">
                     <h3 class="mb-1" id="titleChart">Budget Usage Overview</h3>
+                    <div class="filter-row">
+                        <select id="adminChartTeam" class="form-control" onchange="renderChart()">
+                            <option value="all" id="optChartTeamAll">All Teams</option>
+                        </select>
+                    </div>
                     <div class="chart-container">
                         <canvas id="budgetChart"></canvas>
                     </div>
@@ -244,6 +211,24 @@
 
                 <div class="glass section-card">
                     <h3 class="mb-2" id="titleAdminTable">Employee Management</h3>
+                    <div class="filter-row">
+                        <select id="adminTableMonth" class="form-control" onchange="renderAdminTable()">
+                            <option value="all" id="optAdMonthAll">All Months</option>
+                            <option value="0">January</option><option value="1">February</option>
+                            <option value="2">March</option><option value="3">April</option>
+                            <option value="4">May</option><option value="5">June</option>
+                            <option value="6">July</option><option value="7">August</option>
+                            <option value="8">September</option><option value="9">October</option>
+                            <option value="10">November</option><option value="11">December</option>
+                        </select>
+                        <select id="adminTableYear" class="form-control" onchange="renderAdminTable()">
+                            <option value="all" id="optAdYearAll">All Years</option>
+                            <option value="2026">2026</option><option value="2025">2025</option>
+                        </select>
+                        <select id="adminTableTeam" class="form-control" onchange="renderAdminTable()">
+                            <option value="all" id="optAdTeamAll">All Teams</option>
+                        </select>
+                    </div>
                     <div style="overflow-x: auto;">
                         <table>
                             <thead>
@@ -260,7 +245,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -270,7 +254,8 @@
         let isLoginMode = true;
         let currentLang = 'en';
         let allTransactions = [];
-        let adminData = [];
+        let adminData = { users: [], allTransactions: [] };
+        let teamList = [];
         let currentUserEmail = "";
         let budgetChartInstance = null;
 
@@ -280,7 +265,7 @@
                 btnIn: "Sign In", btnRegMode: "Create Account", btnReg: "Register", btnBack: "Back to Login",
                 menuDash: "Dashboard", menuAdmin: "Admin Panel", menuLog: "Logout",
                 plName: "Member Name", plPhone: "Phone Number", plBudget: "Total Budget", plUsed: "Amount Used", plTeam: "Team",
-                hisTitle: "Transaction History", allM: "All Months", allY: "All Years",
+                hisTitle: "Transaction History", allM: "All Months", allY: "All Years", allT: "All Teams",
                 thDate: "Date & Time", thName: "Name", thPhone: "Phone", thPoints: "Points", thBranch: "Branch",
                 adminTitle: "Budget Usage Overview", mngTitle: "Employee Management",
                 thAdName: "Employee", thAdBudget: "Budget", thAdUsed: "Used", thAdStatus: "Status", thAdTeam: "Team Setup",
@@ -291,7 +276,7 @@
                 btnIn: "เข้าสู่ระบบ", btnRegMode: "สร้างบัญชีใหม่", btnReg: "ยืนยันสมัครสมาชิก", btnBack: "กลับไปหน้าเข้าสู่ระบบ",
                 menuDash: "แดชบอร์ดหลัก", menuAdmin: "จัดการระบบ (Admin)", menuLog: "ออกจากระบบ",
                 plName: "ชื่อสมาชิก", plPhone: "เบอร์โทรศัพท์", plBudget: "โควต้างบประมาณ", plUsed: "ยอดที่ใช้ไป", plTeam: "ทีม",
-                hisTitle: "ประวัติการทำรายการ", allM: "ทุกเดือน", allY: "ทุกปี",
+                hisTitle: "ประวัติการทำรายการ", allM: "ทุกเดือน", allY: "ทุกปี", allT: "ทุกทีม",
                 thDate: "วันที่และเวลา", thName: "ชื่อสมาชิก", thPhone: "เบอร์โทรศัพท์", thPoints: "จำนวนคะแนน", thBranch: "ชื่อสาขา",
                 adminTitle: "กราฟสรุปการใช้งบประมาณ", mngTitle: "จัดการข้อมูลพนักงาน",
                 thAdName: "พนักงาน", thAdBudget: "งบประมาณ", thAdUsed: "ใช้ไป", thAdStatus: "สถานะ", thAdTeam: "ตั้งค่าทีม",
@@ -300,7 +285,6 @@
         };
 
         window.onload = () => {
-            if(window.innerWidth > 768) toggleSidebar(); 
             const savedE = localStorage.getItem('crm_e');
             const savedP = localStorage.getItem('crm_p');
             if(savedE && savedP) {
@@ -322,24 +306,16 @@
             document.getElementById('userTab').classList.add('hidden');
             document.getElementById('adminTab').classList.add('hidden');
             document.getElementById(tabId).classList.remove('hidden');
-            
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            if(window.innerWidth <= 768) toggleSidebar();
         }
 
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'th' : 'en';
             const t = document.getElementById('langToggleBtn');
             const pill = document.getElementById('langPill');
-            
-            if(currentLang === 'th') {
-                t.classList.add('th-active');
-                pill.innerText = 'TH';
-            } else {
-                t.classList.remove('th-active');
-                pill.innerText = 'EN';
-            }
+            if(currentLang === 'th') { t.classList.add('th-active'); pill.innerText = 'TH'; }
+            else { t.classList.remove('th-active'); pill.innerText = 'EN'; }
             applyLanguage();
         }
 
@@ -353,27 +329,22 @@
             document.getElementById('btnRegisterMode').innerText = d.btnRegMode;
             document.getElementById('btnRegister').innerText = d.btnReg;
             document.getElementById('btnLoginMode').innerText = d.btnBack;
-            
             document.getElementById('menuDash').innerText = d.menuDash;
             document.getElementById('menuAdmin').innerText = d.menuAdmin;
             document.getElementById('menuLogout').innerText = d.menuLog;
-            
             document.getElementById('lblPName').innerText = d.plName;
             document.getElementById('lblPPhone').innerText = d.plPhone;
             document.getElementById('lblPBudget').innerText = d.plBudget;
             document.getElementById('lblPUsed').innerText = d.plUsed;
             document.getElementById('lblPTeam').innerText = d.plTeam;
-            
             document.getElementById('titleHistory').innerText = d.hisTitle;
             document.getElementById('optMonthAll').innerText = d.allM;
             document.getElementById('optYearAll').innerText = d.allY;
-            
             document.getElementById('thDate').innerText = d.thDate;
             document.getElementById('thName').innerText = d.thName;
             document.getElementById('thPhone').innerText = d.thPhone;
             document.getElementById('thPoints').innerText = d.thPoints;
             document.getElementById('thBranch').innerText = d.thBranch;
-
             document.getElementById('titleChart').innerText = d.adminTitle;
             document.getElementById('titleAdminTable').innerText = d.mngTitle;
             document.getElementById('thAdName').innerText = d.thAdName;
@@ -381,9 +352,13 @@
             document.getElementById('thAdUsed').innerText = d.thAdUsed;
             document.getElementById('thAdStatus').innerText = d.thAdStatus;
             document.getElementById('thAdTeam').innerText = d.thAdTeam;
+            document.getElementById('optChartTeamAll').innerText = d.allT;
+            document.getElementById('optAdMonthAll').innerText = d.allM;
+            document.getElementById('optAdYearAll').innerText = d.allY;
+            document.getElementById('optAdTeamAll').innerText = d.allT;
 
             if(allTransactions.length) renderHistory();
-            if(adminData.length) renderAdminTable();
+            if(adminData.users.length) renderAdminTable();
         }
 
         function togglePassword() {
@@ -406,10 +381,7 @@
 
         async function fetchAPI(action, data) {
             try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST', body: JSON.stringify({ action, data }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action, data }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 return await res.json();
             } catch (e) { return { status: "error", message: "Network Error" }; }
         }
@@ -429,7 +401,6 @@
             const p = document.getElementById('password').value;
             const rm = document.getElementById('rememberMe').checked;
             if(!e || !p) return msg("Please fill all fields");
-            
             msg("Authenticating...");
             const res = await fetchAPI("login", { email: e, password: p });
             if(res.status === "success") {
@@ -445,6 +416,19 @@
             location.reload();
         }
 
+        function populateTeamDropdowns() {
+            const chartSel = document.getElementById('adminChartTeam');
+            const tblSel = document.getElementById('adminTableTeam');
+            const dStr = langData[currentLang];
+            chartSel.innerHTML = `<option value="all" id="optChartTeamAll">${dStr.allT}</option>`;
+            tblSel.innerHTML = `<option value="all" id="optAdTeamAll">${dStr.allT}</option>`;
+            
+            teamList.forEach(t => {
+                chartSel.innerHTML += `<option value="${t}">${t}</option>`;
+                tblSel.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        }
+
         async function loadApp(email, role) {
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('appSection').classList.remove('hidden');
@@ -454,28 +438,28 @@
             document.getElementById('loader').classList.add('hidden');
 
             if(res.status === "success" && res.data) {
+                teamList = res.data.teams || [];
+                populateTeamDropdowns();
+
                 const p = res.data.profile;
                 document.getElementById('pName').innerText = p.name || "-";
                 document.getElementById('pPhone').innerText = p.phone || "-";
                 document.getElementById('pTeam').innerText = p.team || "-";
                 document.getElementById('pBudget').innerText = p.budget ? Number(p.budget).toLocaleString() : "-";
-                document.getElementById('pUsed').innerText = p.used ? Number(p.used).toLocaleString() : "-";
                 
                 allTransactions = res.data.transactions || [];
                 
-                // Logic: Set filter to latest month available in data
-                const validDates = allTransactions.map(t => new Date(t.date)).filter(d => !isNaN(d));
-                if(validDates.length > 0) {
-                    const latest = new Date(Math.max(...validDates));
-                    document.getElementById('filterMonth').value = latest.getMonth().toString();
-                    document.getElementById('filterYear').value = latest.getFullYear().toString();
-                }
+                const now = new Date();
+                document.getElementById('filterMonth').value = now.getMonth().toString();
+                document.getElementById('filterYear').value = now.getFullYear().toString();
                 
                 renderHistory();
 
                 if(res.data.role === "Admin" && res.data.adminStats) {
                     document.getElementById('adminMenuBtn').classList.remove('hidden');
-                    adminData = res.data.adminStats.users;
+                    adminData = res.data.adminStats;
+                    document.getElementById('adminTableMonth').value = now.getMonth().toString();
+                    document.getElementById('adminTableYear').value = now.getFullYear().toString();
                     renderAdminTable();
                     renderChart();
                 }
@@ -488,14 +472,18 @@
             const yFilter = document.getElementById('filterYear').value;
             const dStr = langData[currentLang];
             tbody.innerHTML = "";
+            let totalUsed = 0;
 
             const filtered = allTransactions.filter(item => {
                 const dateObj = new Date(item.date);
                 if(isNaN(dateObj)) return false;
                 const mMatch = mFilter === "all" || dateObj.getMonth().toString() === mFilter;
                 const yMatch = yFilter === "all" || dateObj.getFullYear().toString() === yFilter;
+                if(mMatch && yMatch) totalUsed += Number(item.points || 0);
                 return mMatch && yMatch;
             }).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            document.getElementById('pUsed').innerText = totalUsed.toLocaleString();
 
             if(filtered.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center">${dStr.noData}</td></tr>`;
@@ -515,22 +503,43 @@
 
         function renderAdminTable() {
             const tbody = document.getElementById('adminBody');
+            const mFilter = document.getElementById('adminTableMonth').value;
+            const yFilter = document.getElementById('adminTableYear').value;
+            const tFilter = document.getElementById('adminTableTeam').value;
             const dStr = langData[currentLang];
             tbody.innerHTML = "";
             
-            adminData.forEach(u => {
-                const isExceed = u.used > u.budget;
+            adminData.users.forEach(u => {
+                if (tFilter !== "all" && u.team !== tFilter) return;
+
+                let monthUsed = 0;
+                adminData.allTransactions.forEach(t => {
+                    if (t.email === u.email) {
+                        const dObj = new Date(t.date);
+                        if(isNaN(dObj)) return;
+                        const mMatch = mFilter === "all" || dObj.getMonth().toString() === mFilter;
+                        const yMatch = yFilter === "all" || dObj.getFullYear().toString() === yFilter;
+                        if(mMatch && yMatch) monthUsed += Number(t.points || 0);
+                    }
+                });
+
+                const isExceed = monthUsed > u.budget;
                 const statusTag = isExceed ? `<span class="tag-exceed">${dStr.exceed}</span>` : `<span class="tag-safe">${dStr.safe}</span>`;
                 const safeEmail = u.email.replace(/'/g, "\\'");
                 
+                let selectOptions = `<option value="-">-</option>`;
+                teamList.forEach(t => {
+                    selectOptions += `<option value="${t}" ${u.team === t ? 'selected' : ''}>${t}</option>`;
+                });
+
                 tbody.innerHTML += `<tr>
                     <td><div><b>${u.name}</b></div><div style="font-size:11px;color:var(--text-muted);">${u.email}</div></td>
                     <td>${Number(u.budget).toLocaleString()}</td>
-                    <td style="color: ${isExceed ? 'var(--accent-2)' : 'white'}; font-weight:bold;">${Number(u.used).toLocaleString()}</td>
+                    <td style="color: ${isExceed ? 'var(--accent-2)' : 'white'}; font-weight:bold;">${Number(monthUsed).toLocaleString()}</td>
                     <td>${statusTag}</td>
                     <td>
                         <div style="display:flex; gap:10px;">
-                            <input type="text" id="team_${u.email}" class="form-control" style="padding:6px 10px; min-width: 100px;" value="${u.team}">
+                            <select id="team_${u.email}" class="form-control" style="padding:6px; min-width: 120px;">${selectOptions}</select>
                             <button class="btn-neon" style="margin:0; padding:6px 12px; width:auto; font-size:12px;" onclick="saveTeam('${safeEmail}')">${dStr.btnSave}</button>
                         </div>
                     </td>
@@ -544,51 +553,48 @@
             btn.innerText = "...";
             const res = await fetchAPI("updateTeam", { adminEmail: currentUserEmail, targetEmail: email, newTeam: newTeam });
             btn.innerText = langData[currentLang].btnSave;
-            if(res.status === "success") alert(res.message);
+            if(res.status === "success") {
+                const uIndex = adminData.users.findIndex(u => u.email === email);
+                if(uIndex > -1) adminData.users[uIndex].team = newTeam;
+                alert(res.message);
+                renderChart();
+            }
             else alert(res.message);
         }
 
         function renderChart() {
+            const tFilter = document.getElementById('adminChartTeam').value;
             const ctx = document.getElementById('budgetChart').getContext('2d');
             if(budgetChartInstance) budgetChartInstance.destroy();
             
-            const labels = adminData.map(u => u.name.split(' ')[0]);
-            const budgetLine = adminData.map(u => u.budget);
-            const usedBars = adminData.map(u => u.used);
+            const filteredUsers = adminData.users.filter(u => tFilter === "all" || u.team === tFilter);
+            
+            const labels = [];
+            const budgetLine = [];
+            const usedBars = [];
+
+            filteredUsers.forEach(u => {
+                labels.push(u.name.split(' ')[0]);
+                budgetLine.push(u.budget);
+                let totalUsed = 0;
+                adminData.allTransactions.forEach(t => {
+                    if(t.email === u.email) totalUsed += Number(t.points || 0);
+                });
+                usedBars.push(totalUsed);
+            });
 
             budgetChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            type: 'bar',
-                            label: currentLang==='th'?'ยอดที่ใช้ไป':'Used Amount',
-                            data: usedBars,
-                            backgroundColor: '#fe0979',
-                            borderRadius: 6
-                        },
-                        {
-                            type: 'line',
-                            label: currentLang==='th'?'เส้นงบประมาณ (โควต้า)':'Budget Limit',
-                            data: budgetLine,
-                            borderColor: '#00f2fe',
-                            backgroundColor: '#00f2fe',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            tension: 0.3,
-                            fill: false
-                        }
+                        { type: 'bar', label: currentLang==='th'?'ยอดรวมที่ใช้ไปทั้งหมด':'Total Used Amount', data: usedBars, backgroundColor: '#fe0979', borderRadius: 6 },
+                        { type: 'line', label: currentLang==='th'?'เส้นงบประมาณ (โควต้า)':'Budget Limit', data: budgetLine, borderColor: '#00f2fe', backgroundColor: '#00f2fe', borderWidth: 2, borderDash: [5, 5], tension: 0.3, fill: false }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    color: '#a0a0b0',
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0a0b0' } },
-                        x: { grid: { display: false }, ticks: { color: '#a0a0b0' } }
-                    },
+                    responsive: true, maintainAspectRatio: false, color: '#a0a0b0',
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0a0b0' } }, x: { grid: { display: false }, ticks: { color: '#a0a0b0' } } },
                     plugins: { legend: { labels: { color: '#ffffff' } } }
                 }
             });
