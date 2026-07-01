@@ -288,6 +288,7 @@
         let budgetChartInstance = null;
 
         const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const thaiShortMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
         const langData = {
             en: {
@@ -500,15 +501,23 @@
 
         function isMatchMonthTag(monthTag, mFilter, yFilter) {
             if (!monthTag) return false;
+            const tag = monthTag.toString().toLowerCase().trim();
             let mMatch = true; let yMatch = true;
+            
             if (mFilter !== "all") {
-                const mStr = shortMonths[parseInt(mFilter)];
-                mMatch = monthTag.startsWith(mStr);
+                const idx = parseInt(mFilter);
+                const enStr = shortMonths[idx].toLowerCase();
+                const thStr = thaiShortMonths[idx];
+                const fullEnStr = enStr === "jun" ? "june" : (enStr === "jul" ? "july" : enStr); 
+                
+                mMatch = tag.includes(enStr) || tag.includes(thStr) || tag.includes(fullEnStr);
             }
+            
             if (yFilter !== "all") {
-                const yStr = yFilter.substring(2);
-                yMatch = monthTag.endsWith(yStr);
+                const yStr = yFilter.substring(2); 
+                yMatch = tag.includes(yStr) || tag.includes(yFilter);
             }
+            
             return mMatch && yMatch;
         }
 
@@ -586,8 +595,16 @@
                 if (tFilter !== "all" && u.team !== tFilter) return;
 
                 let monthUsed = 0;
+                const uEmail = (u.email || "").toLowerCase().trim();
+                const uName = (u.name || "").toLowerCase().replace(/\s+/g, '');
+
                 adminData.allTransactions.forEach(t => {
-                    if (t.email === u.email && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
+                    const tEmail = (t.email || "").toLowerCase().trim();
+                    const tName = (t.name || "").toLowerCase().replace(/\s+/g, '');
+                    
+                    const isMatch = (tEmail && tEmail === uEmail) || (tName && tName === uName);
+                    
+                    if (isMatch && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
                         monthUsed += Number(t.points || 0);
                     }
                 });
@@ -647,13 +664,23 @@
             filteredUsers.forEach(u => {
                 labels.push(u.name.split(' ')[0]);
                 budgetLine.push(u.budget);
-                let totalUsed = 0;
+                
+                let monthUsed = 0;
+                const uEmail = (u.email || "").toLowerCase().trim();
+                const uName = (u.name || "").toLowerCase().replace(/\s+/g, '');
+
                 adminData.allTransactions.forEach(t => {
-                    if(t.email === u.email && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
-                        totalUsed += Number(t.points || 0);
+                    const tEmail = (t.email || "").toLowerCase().trim();
+                    const tName = (t.name || "").toLowerCase().replace(/\s+/g, '');
+                    
+                    const isMatch = (tEmail && tEmail === uEmail) || (tName && tName === uName);
+                    
+                    if (isMatch && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
+                        monthUsed += Number(t.points || 0);
                     }
                 });
-                usedBars.push(totalUsed);
+                
+                usedBars.push(monthUsed);
             });
 
             budgetChartInstance = new Chart(ctx, {
