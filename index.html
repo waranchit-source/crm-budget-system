@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>CRM Space</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://script.google.com">
+    <link rel="preconnect" href="https://script.googleusercontent.com">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
@@ -20,16 +22,17 @@
 
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         
-        body { background: radial-gradient(circle at top left, #1a1b26, var(--bg-color)); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        body { background: radial-gradient(circle at top left, #1a1b26, var(--bg-color)); background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
 
         .glass { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
 
-        .app-container { display: flex; height: 100vh; overflow: hidden; position: relative; }
+        .app-container { display: flex; height: 100vh; height: 100dvh; overflow: hidden; position: relative; }
         
-        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 90; opacity: 0; transition: 0.3s; }
+        .mobile-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 90; opacity: 0; transition: 0.3s; }
         .mobile-overlay.active { display: block; opacity: 1; }
 
-        .sidebar { width: 80px; height: 100vh; position: fixed; top: 0; left: 0; z-index: 100; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; padding: 20px 10px; overflow-x: hidden; }
+        .sidebar { width: 80px; height: 100vh; height: 100dvh; position: fixed; top: 0; left: 0; z-index: 100; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; padding: 20px 10px; overflow-x: hidden; }
         .sidebar.active { width: 260px; padding: 20px; }
         
         .close-sidebar-btn { display: none; }
@@ -43,19 +46,21 @@
         .menu-item .text { opacity: 0; transition: 0.2s; pointer-events: none; }
         .sidebar.active .menu-item .text { opacity: 1; pointer-events: auto; }
         
-        .main-content { flex: 1; padding: 20px 40px; height: 100vh; overflow-y: auto; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-left: 80px; width: calc(100% - 80px); }
+        .main-content { flex: 1; padding: 20px 40px; height: 100vh; height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin-left: 80px; width: calc(100% - 80px); }
         .main-content.shifted { margin-left: 260px; width: calc(100% - 260px); }
 
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 30px; }
+        .sync-status { flex: 1; min-width: 0; text-align: right; font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sync-status.warn { color: var(--accent-2); }
         .hamburger { font-size: 20px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .hamburger:hover { background: rgba(255,255,255,0.1); }
         
-        .lang-toggle { display: flex; align-items: center; background: rgba(255,255,255,0.1); border-radius: 30px; padding: 4px; cursor: pointer; width: 80px; position: relative;}
+        .lang-toggle { display: flex; align-items: center; background: rgba(255,255,255,0.1); border-radius: 30px; padding: 4px; cursor: pointer; width: 80px; min-width: 80px; position: relative;}
         .lang-pill { background: linear-gradient(45deg, var(--accent-2), var(--accent-1)); border-radius: 20px; color: white; padding: 4px 10px; font-size: 12px; font-weight: bold; position: absolute; left: 4px; transition: 0.3s; width: 36px; text-align: center;}
         .lang-text { width: 100%; display: flex; justify-content: space-between; padding: 0 10px; font-size: 12px; font-weight: bold; color: var(--text-muted); pointer-events: none;}
         .lang-toggle.th-active .lang-pill { transform: translateX(36px); }
 
-        .auth-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: absolute; top: 0; left: 0; z-index: 50; padding: 20px; }
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; width: 100%; position: absolute; top: 0; left: 0; z-index: 50; padding: 20px; }
         .auth-card { width: 100%; max-width: 400px; padding: 40px 30px; }
         .form-group { margin-bottom: 20px; position: relative; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
@@ -91,21 +96,53 @@
         .mb-1 { margin-bottom: 10px; }
         .mb-2 { margin-bottom: 20px; }
         #loader { text-align: center; padding: 40px; color: var(--accent-1); font-weight: bold; letter-spacing: 2px;}
+        .load-error { padding: 30px 20px; margin-bottom: 30px; text-align: center; }
+        .load-error p { color: var(--accent-2); margin-bottom: 15px; font-size: 14px; }
+        .load-error .btn-neon { width: auto; padding: 10px 30px; margin: 0; }
 
         .chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px;}
 
+        @media (max-width: 1024px) {
+            .main-content { padding: 20px; }
+            .chart-container { height: 300px; }
+        }
+
         @media (max-width: 768px) {
-            .sidebar { width: 260px; transform: translateX(-100%); padding: 20px; }
+            .sidebar { width: 260px; transform: translateX(-100%); padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; width: 100%; padding: 15px; }
+            .main-content { margin-left: 0; width: 100%; padding: 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
             .main-content.shifted { margin-left: 0; width: 100%; }
             .close-sidebar-btn { display: block; position: absolute; top: 15px; right: 20px; background: none; border: none; color: white; font-size: 28px; cursor: pointer; z-index: 101; }
             .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
             .filter-row select.form-control { flex: 1 1 100%; }
+            .topbar { margin-bottom: 20px; }
+            .dashboard-grid { gap: 10px; margin-bottom: 20px; }
+            .info-card { padding: 15px; }
+            .info-value { font-size: 18px; }
+            .section-card { padding: 15px; margin-bottom: 20px; border-radius: 16px; }
+            .section-card h3 { font-size: 17px; }
+            .form-control { font-size: 16px; }
+            .chart-container { height: 260px; margin-top: 10px; }
+            .auth-card { padding: 30px 20px; }
         }
-        
+
+        @media (max-width: 600px) {
+            table { min-width: 0; }
+            table thead { display: none; }
+            table, table tbody, table tr, table td { display: block; width: 100%; }
+            table tr { border: 1px solid var(--glass-border); border-radius: 12px; margin-bottom: 10px; padding: 6px 12px; background: rgba(255,255,255,0.02); }
+            table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; text-align: right; word-break: break-word; }
+            table tr td:last-child { border-bottom: none; }
+            table td[data-label]::before { content: attr(data-label); color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; flex-shrink: 0; }
+            table td.text-center { justify-content: center; text-align: center; }
+            table td .team-setup { justify-content: flex-end; flex-wrap: wrap; }
+            tr:hover td { background: transparent; }
+        }
+
         @media (max-width: 480px) {
             .dashboard-grid { grid-template-columns: 1fr; }
+            .info-value { font-size: 17px; }
+            .main-content { padding: 12px; }
         }
     </style>
 </head>
@@ -160,6 +197,7 @@
         <div class="main-content" id="mainContent">
             <div class="topbar">
                 <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <div id="syncStatus" class="sync-status"></div>
                 <div class="lang-toggle" onclick="toggleLanguage()" id="langToggleBtn">
                     <div class="lang-text"><span>EN</span><span>TH</span></div>
                     <div class="lang-pill" id="langPill">EN</div>
@@ -167,6 +205,10 @@
             </div>
 
             <div id="loader" class="hidden">SYNCING DATA...</div>
+            <div id="loadError" class="glass load-error hidden">
+                <p id="loadErrorText">Unable to load data.</p>
+                <button class="btn-neon" id="btnRetry" onclick="retryLoad()">Try Again</button>
+            </div>
 
             <div id="userTab">
                 <div class="dashboard-grid">
@@ -277,8 +319,10 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzS6Y6Uw0gWRJA5fabM7C2C61dL1YZ5nfUR0GZpHtkAjQHCjnpE_7dScce_hFaad86e/exec"; 
-        
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzS6Y6Uw0gWRJA5fabM7C2C61dL1YZ5nfUR0GZpHtkAjQHCjnpE_7dScce_hFaad86e/exec";
+        const API_TIMEOUT = 90000;
+        const CACHE_PREFIX = 'crm_cache_';
+
         let isLoginMode = true;
         let currentLang = 'en';
         let allTransactions = [];
@@ -286,6 +330,12 @@
         let teamList = [];
         let currentUserEmail = "";
         let budgetChartInstance = null;
+        let dashboardReady = false;
+        let loadToken = 0;
+        let syncState = "";
+        let syncTime = null;
+        let txIndex = { byEmail: new Map(), byName: new Map() };
+        let lastWide = window.innerWidth > 768;
 
         const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const thaiShortMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
@@ -300,7 +350,9 @@
                 thDate: "Date & Time", thName: "Name", thPhone: "Phone", thPoints: "Points", thBranch: "Branch",
                 adminTitle: "Budget Usage Overview", mngTitle: "Employee Management",
                 thAdName: "Employee", thAdBudget: "Budget", thAdUsed: "Used", thAdStatus: "Status", thAdTeam: "Team Setup",
-                noData: "No data found.", btnSave: "Save", exceed: "EXCEEDED", safe: "SAFE"
+                noData: "No data found.", btnSave: "Save", exceed: "EXCEEDED", safe: "SAFE",
+                syncing: "Updating data...", synced: "Updated", savedData: "Offline · showing saved data from",
+                loadErr: "Unable to load data. Please check your internet connection and try again.", retry: "Try Again"
             },
             th: {
                 login: "เข้าสู่ระบบ", register: "สมัครสมาชิก", email: "อีเมล", pwd: "รหัสผ่าน", remember: "จดจำบัญชี",
@@ -311,12 +363,14 @@
                 thDate: "วันที่และเวลา", thName: "ชื่อสมาชิก", thPhone: "เบอร์โทรศัพท์", thPoints: "จำนวนคะแนน", thBranch: "ชื่อสาขา",
                 adminTitle: "กราฟสรุปการใช้งบประมาณ", mngTitle: "จัดการข้อมูลพนักงาน",
                 thAdName: "พนักงาน", thAdBudget: "งบประมาณ", thAdUsed: "ใช้ไป", thAdStatus: "สถานะ", thAdTeam: "ตั้งค่าทีม",
-                noData: "ไม่พบข้อมูล", btnSave: "บันทึก", exceed: "เกินงบ", safe: "ปกติ"
+                noData: "ไม่พบข้อมูล", btnSave: "บันทึก", exceed: "เกินงบ", safe: "ปกติ",
+                syncing: "กำลังอัปเดตข้อมูล...", synced: "อัปเดตล่าสุด", savedData: "ออฟไลน์ · แสดงข้อมูลที่บันทึกไว้เมื่อ",
+                loadErr: "โหลดข้อมูลไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง", retry: "ลองใหม่"
             }
         };
 
         window.onload = () => {
-            if(window.innerWidth > 768) {
+            if(window.innerWidth > 1024) {
                 document.getElementById('sidebar').classList.add('active');
                 document.getElementById('mainContent').classList.add('shifted');
             }
@@ -326,15 +380,28 @@
                 document.getElementById('email').value = savedE;
                 document.getElementById('password').value = savedP;
                 document.getElementById('rememberMe').checked = true;
-                handleLogin();
+                const cached = readCache(savedE);
+                if(cached) quickResume(savedE, savedP, cached);
+                else handleLogin();
             }
         };
+
+        window.addEventListener('resize', () => {
+            const wide = window.innerWidth > 768;
+            if (wide === lastWide) return;
+            lastWide = wide;
+            const sb = document.getElementById('sidebar');
+            const mc = document.getElementById('mainContent');
+            document.getElementById('mobileOverlay').classList.remove('active');
+            if (wide) { sb.classList.add('active'); mc.classList.add('shifted'); }
+            else { sb.classList.remove('active'); mc.classList.remove('shifted'); }
+        });
 
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             const mc = document.getElementById('mainContent');
             const ov = document.getElementById('mobileOverlay');
-            
+
             if (window.innerWidth > 768) {
                 sb.classList.toggle('active');
                 mc.classList.toggle('shifted');
@@ -357,8 +424,8 @@
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            
-            closeSidebarMobile(); 
+
+            closeSidebarMobile();
             resetFiltersToCurrentMonth();
             if(tabId === 'userTab') renderHistory();
             if(tabId === 'adminTab') { renderAdminTable(); renderChart(); }
@@ -392,7 +459,7 @@
             document.getElementById('lblPUsed').innerText = d.plUsed;
             document.getElementById('lblPTeam').innerText = d.plTeam;
             document.getElementById('titleHistory').innerText = d.hisTitle;
-            
+
             document.getElementById('optMonthAll').innerText = d.allM;
             document.getElementById('optYearAll').innerText = d.allY;
             document.getElementById('optChartMonthAll').innerText = d.allM;
@@ -414,6 +481,9 @@
             document.getElementById('thAdUsed').innerText = d.thAdUsed;
             document.getElementById('thAdStatus').innerText = d.thAdStatus;
             document.getElementById('thAdTeam').innerText = d.thAdTeam;
+            document.getElementById('loadErrorText').innerText = d.loadErr;
+            document.getElementById('btnRetry').innerText = d.retry;
+            setSync(syncState, syncTime);
 
             if(allTransactions.length) renderHistory();
             if(adminData.users.length) { renderAdminTable(); renderChart(); }
@@ -437,11 +507,68 @@
 
         function msg(text) { document.getElementById('authError').innerText = text; }
 
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
         async function fetchAPI(action, data) {
+            const attempts = (action === "login" || action === "getDashboard") ? 2 : 1;
+            for (let i = 0; i < attempts; i++) {
+                const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                const timer = ctrl ? setTimeout(() => ctrl.abort(), API_TIMEOUT) : null;
+                try {
+                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action, data }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctrl ? ctrl.signal : undefined });
+                    const json = await res.json();
+                    if (timer) clearTimeout(timer);
+                    return json;
+                } catch (e) {
+                    if (timer) clearTimeout(timer);
+                    if (e && e.name === 'AbortError') break;
+                    if (i < attempts - 1) await wait(1500);
+                }
+            }
+            return { status: "error", message: "Network Error", network: true };
+        }
+
+        function cacheKey(email) { return CACHE_PREFIX + (email || "").toLowerCase().trim(); }
+
+        function readCache(email) {
             try {
-                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action, data }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                return await res.json();
-            } catch (e) { return { status: "error", message: "Network Error" }; }
+                const raw = localStorage.getItem(cacheKey(email));
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                return obj && obj.data ? obj : null;
+            } catch (e) { return null; }
+        }
+
+        function writeCache(email, data) {
+            try { localStorage.setItem(cacheKey(email), JSON.stringify({ t: Date.now(), data: data })); }
+            catch (e) { try { localStorage.removeItem(cacheKey(email)); } catch (x) {} }
+        }
+
+        function clearAllCache() {
+            try {
+                Object.keys(localStorage).forEach(k => { if (k.indexOf(CACHE_PREFIX) === 0) localStorage.removeItem(k); });
+            } catch (e) {}
+        }
+
+        function formatTime(ts) {
+            const d = new Date(ts);
+            const pad = n => (n < 10 ? '0' : '') + n;
+            const today = new Date();
+            const sameDay = d.toDateString() === today.toDateString();
+            const datePart = sameDay ? '' : `${pad(d.getDate())}/${pad(d.getMonth() + 1)} `;
+            return `${datePart}${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function setSync(state, ts) {
+            syncState = state || "";
+            syncTime = ts || null;
+            const el = document.getElementById('syncStatus');
+            const d = langData[currentLang];
+            el.classList.remove('warn');
+            if (syncState === 'syncing') el.innerText = d.syncing;
+            else if (syncState === 'synced') el.innerText = `${d.synced} ${formatTime(syncTime)}`;
+            else if (syncState === 'offline') { el.innerText = `${d.savedData} ${formatTime(syncTime)}`; el.classList.add('warn'); }
+            else el.innerText = "";
         }
 
         async function handleRegister() {
@@ -460,17 +587,59 @@
             const rm = document.getElementById('rememberMe').checked;
             if(!e || !p) return msg("Please fill all fields");
             msg("Authenticating...");
+            const dashPromise = fetchAPI("getDashboard", { email: e });
             const res = await fetchAPI("login", { email: e, password: p });
             if(res.status === "success") {
                 if(rm) { localStorage.setItem('crm_e', e); localStorage.setItem('crm_p', p); }
                 else { localStorage.removeItem('crm_e'); localStorage.removeItem('crm_p'); }
                 currentUserEmail = e;
-                loadApp(e, res.role);
+                loadApp(e, res.role, dashPromise);
             } else msg(res.message);
+        }
+
+        async function quickResume(e, p, cached) {
+            currentUserEmail = e;
+            showApp();
+            applyDashboard(cached.data);
+            setSync('syncing');
+            const token = ++loadToken;
+            const dashPromise = fetchAPI("getDashboard", { email: e });
+            const loginRes = await fetchAPI("login", { email: e, password: p });
+            if (token !== loadToken) return;
+            if (loginRes.status !== "success" && !loginRes.network) {
+                resetToLogin(loginRes.message);
+                return;
+            }
+            const res = await dashPromise;
+            if (token !== loadToken) return;
+            handleDashResult(e, res, cached.t);
+        }
+
+        function showApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+        }
+
+        function resetToLogin(message) {
+            loadToken++;
+            localStorage.removeItem('crm_e'); localStorage.removeItem('crm_p');
+            clearAllCache();
+            dashboardReady = false;
+            allTransactions = [];
+            adminData = { users: [], allTransactions: [] };
+            currentUserEmail = "";
+            setSync('');
+            document.getElementById('adminMenuBtn').classList.add('hidden');
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('password').value = "";
+            document.getElementById('rememberMe').checked = false;
+            msg(message || "");
         }
 
         function handleLogout() {
             localStorage.removeItem('crm_e'); localStorage.removeItem('crm_p');
+            clearAllCache();
             location.reload();
         }
 
@@ -478,19 +647,17 @@
             const chartSel = document.getElementById('adminChartTeam');
             const tblSel = document.getElementById('adminTableTeam');
             const dStr = langData[currentLang];
-            chartSel.innerHTML = `<option value="all" id="optChartTeamAll">${dStr.allT}</option>`;
-            tblSel.innerHTML = `<option value="all" id="optAdTeamAll">${dStr.allT}</option>`;
-            teamList.forEach(t => {
-                chartSel.innerHTML += `<option value="${t}">${t}</option>`;
-                tblSel.innerHTML += `<option value="${t}">${t}</option>`;
-            });
+            let opts = "";
+            teamList.forEach(t => { opts += `<option value="${t}">${t}</option>`; });
+            chartSel.innerHTML = `<option value="all" id="optChartTeamAll">${dStr.allT}</option>` + opts;
+            tblSel.innerHTML = `<option value="all" id="optAdTeamAll">${dStr.allT}</option>` + opts;
         }
 
         function resetFiltersToCurrentMonth() {
             const now = new Date();
             const m = now.getMonth().toString();
             const y = now.getFullYear().toString();
-            
+
             document.getElementById('filterMonth').value = m;
             document.getElementById('filterYear').value = y;
             document.getElementById('adminChartMonth').value = m;
@@ -503,53 +670,93 @@
             if (!monthTag) return false;
             const tag = monthTag.toString().toLowerCase().trim();
             let mMatch = true; let yMatch = true;
-            
+
             if (mFilter !== "all") {
                 const idx = parseInt(mFilter);
                 const enStr = shortMonths[idx].toLowerCase();
                 const thStr = thaiShortMonths[idx];
-                const fullEnStr = enStr === "jun" ? "june" : (enStr === "jul" ? "july" : enStr); 
-                
+                const fullEnStr = enStr === "jun" ? "june" : (enStr === "jul" ? "july" : enStr);
+
                 mMatch = tag.includes(enStr) || tag.includes(thStr) || tag.includes(fullEnStr);
             }
-            
+
             if (yFilter !== "all") {
-                const yStr = yFilter.substring(2); 
+                const yStr = yFilter.substring(2);
                 yMatch = tag.includes(yStr) || tag.includes(yFilter);
             }
-            
+
             return mMatch && yMatch;
         }
 
-        async function loadApp(email, role) {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('appSection').classList.remove('hidden');
-            document.getElementById('loader').classList.remove('hidden');
+        async function loadApp(email, role, dashPromise) {
+            showApp();
+            const cached = readCache(email);
+            if (cached && !dashboardReady) applyDashboard(cached.data);
+            await refreshDashboard(email, dashPromise, cached ? cached.t : null);
+        }
 
-            const res = await fetchAPI("getDashboard", { email: email });
+        async function refreshDashboard(email, dashPromise, cachedTime) {
+            const token = ++loadToken;
+            document.getElementById('loadError').classList.add('hidden');
+            if (dashboardReady) setSync('syncing');
+            else document.getElementById('loader').classList.remove('hidden');
+            const res = await (dashPromise || fetchAPI("getDashboard", { email: email }));
+            if (token !== loadToken) return;
+            handleDashResult(email, res, cachedTime);
+        }
+
+        function handleDashResult(email, res, cachedTime) {
             document.getElementById('loader').classList.add('hidden');
-
             if(res.status === "success" && res.data) {
-                teamList = res.data.teams || [];
-                populateTeamDropdowns();
+                document.getElementById('loadError').classList.add('hidden');
+                applyDashboard(res.data);
+                writeCache(email, res.data);
+                setSync('synced', Date.now());
+            } else if (dashboardReady) {
+                setSync('offline', cachedTime || syncTime || Date.now());
+            } else {
+                setSync('');
+                document.getElementById('loadErrorText').innerText = langData[currentLang].loadErr;
+                document.getElementById('loadError').classList.remove('hidden');
+            }
+        }
 
-                const p = res.data.profile;
-                document.getElementById('pName').innerText = p.name || "-";
-                document.getElementById('pPhone').innerText = p.phone || "-";
-                document.getElementById('pTeam').innerText = p.team || "-";
-                document.getElementById('pBudget').innerText = p.budget ? Number(p.budget).toLocaleString() : "-";
-                
-                allTransactions = res.data.transactions || [];
-                
-                resetFiltersToCurrentMonth();
-                renderHistory();
+        function retryLoad() {
+            if (currentUserEmail) refreshDashboard(currentUserEmail, null, null);
+        }
 
-                if(res.data.role === "Admin" && res.data.adminStats) {
-                    document.getElementById('adminMenuBtn').classList.remove('hidden');
-                    adminData = res.data.adminStats;
-                    renderAdminTable();
-                    renderChart();
-                }
+        function applyDashboard(data) {
+            const firstRender = !dashboardReady;
+            const prevChartTeam = document.getElementById('adminChartTeam').value;
+            const prevTableTeam = document.getElementById('adminTableTeam').value;
+
+            teamList = data.teams || [];
+            populateTeamDropdowns();
+            if (!firstRender) {
+                if (teamList.includes(prevChartTeam)) document.getElementById('adminChartTeam').value = prevChartTeam;
+                if (teamList.includes(prevTableTeam)) document.getElementById('adminTableTeam').value = prevTableTeam;
+            }
+
+            const p = data.profile || {};
+            document.getElementById('pName').innerText = p.name || "-";
+            document.getElementById('pPhone').innerText = p.phone || "-";
+            document.getElementById('pTeam').innerText = p.team || "-";
+            document.getElementById('pBudget').innerText = p.budget ? Number(p.budget).toLocaleString() : "-";
+
+            allTransactions = data.transactions || [];
+
+            if (firstRender) resetFiltersToCurrentMonth();
+            dashboardReady = true;
+            renderHistory();
+
+            if(data.role === "Admin" && data.adminStats) {
+                document.getElementById('adminMenuBtn').classList.remove('hidden');
+                adminData = data.adminStats;
+                if (!adminData.users) adminData.users = [];
+                if (!adminData.allTransactions) adminData.allTransactions = [];
+                buildTxIndex();
+                renderAdminTable();
+                renderChart();
             }
         }
 
@@ -558,14 +765,13 @@
             const mFilter = document.getElementById('filterMonth').value;
             const yFilter = document.getElementById('filterYear').value;
             const dStr = langData[currentLang];
-            tbody.innerHTML = "";
             let totalUsed = 0;
 
             const filtered = allTransactions.filter(item => {
                 const match = isMatchMonthTag(item.monthTag, mFilter, yFilter);
                 if(match) totalUsed += Number(item.points || 0);
                 return match;
-            }).sort((a,b) => a.sortValue - b.sortValue); 
+            }).sort((a,b) => a.sortValue - b.sortValue);
 
             document.getElementById('pUsed').innerText = totalUsed.toLocaleString();
 
@@ -574,13 +780,43 @@
                 return;
             }
 
+            let html = "";
             filtered.forEach(i => {
-                tbody.innerHTML += `<tr>
-                    <td>${i.displayDate}</td><td>${i.name||'-'}</td><td>${i.phone||'-'}</td>
-                    <td style="color:var(--accent-1); font-weight:bold;">${i.points?Number(i.points).toLocaleString():'-'}</td>
-                    <td>${i.branch||'-'}</td>
+                html += `<tr>
+                    <td data-label="${dStr.thDate}">${i.displayDate}</td><td data-label="${dStr.thName}">${i.name||'-'}</td><td data-label="${dStr.thPhone}">${i.phone||'-'}</td>
+                    <td data-label="${dStr.thPoints}" style="color:var(--accent-1); font-weight:bold;">${i.points?Number(i.points).toLocaleString():'-'}</td>
+                    <td data-label="${dStr.thBranch}">${i.branch||'-'}</td>
                 </tr>`;
             });
+            tbody.innerHTML = html;
+        }
+
+        function buildTxIndex() {
+            txIndex = { byEmail: new Map(), byName: new Map() };
+            adminData.allTransactions.forEach(t => {
+                const tEmail = (t.email || "").toLowerCase().trim();
+                const tName = (t.name || "").toLowerCase().replace(/\s+/g, '');
+                if (tEmail) { if (!txIndex.byEmail.has(tEmail)) txIndex.byEmail.set(tEmail, []); txIndex.byEmail.get(tEmail).push(t); }
+                if (tName) { if (!txIndex.byName.has(tName)) txIndex.byName.set(tName, []); txIndex.byName.get(tName).push(t); }
+            });
+        }
+
+        function calcUserUsed(u, mFilter, yFilter) {
+            const uEmail = (u.email || "").toLowerCase().trim();
+            const uName = (u.name || "").toLowerCase().replace(/\s+/g, '');
+            const seen = new Set();
+            let used = 0;
+            const addList = list => {
+                if (!list) return;
+                list.forEach(t => {
+                    if (seen.has(t)) return;
+                    seen.add(t);
+                    if (isMatchMonthTag(t.monthTag, mFilter, yFilter)) used += Number(t.points || 0);
+                });
+            };
+            if (uEmail) addList(txIndex.byEmail.get(uEmail));
+            if (uName) addList(txIndex.byName.get(uName));
+            return used;
         }
 
         function renderAdminTable() {
@@ -589,48 +825,36 @@
             const yFilter = document.getElementById('adminTableYear').value;
             const tFilter = document.getElementById('adminTableTeam').value;
             const dStr = langData[currentLang];
-            tbody.innerHTML = "";
-            
+            let html = "";
+
             adminData.users.forEach(u => {
                 if (tFilter !== "all" && u.team !== tFilter) return;
 
-                let monthUsed = 0;
-                const uEmail = (u.email || "").toLowerCase().trim();
-                const uName = (u.name || "").toLowerCase().replace(/\s+/g, '');
-
-                adminData.allTransactions.forEach(t => {
-                    const tEmail = (t.email || "").toLowerCase().trim();
-                    const tName = (t.name || "").toLowerCase().replace(/\s+/g, '');
-                    
-                    const isMatch = (tEmail && tEmail === uEmail) || (tName && tName === uName);
-                    
-                    if (isMatch && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
-                        monthUsed += Number(t.points || 0);
-                    }
-                });
+                const monthUsed = calcUserUsed(u, mFilter, yFilter);
 
                 const isExceed = monthUsed > u.budget;
                 const statusTag = isExceed ? `<span class="tag-exceed">${dStr.exceed}</span>` : `<span class="tag-safe">${dStr.safe}</span>`;
                 const safeEmail = u.email.replace(/'/g, "\\'");
-                
+
                 let selectOptions = `<option value="-">-</option>`;
                 teamList.forEach(t => {
                     selectOptions += `<option value="${t}" ${u.team === t ? 'selected' : ''}>${t}</option>`;
                 });
 
-                tbody.innerHTML += `<tr>
-                    <td><div><b>${u.name}</b></div><div style="font-size:11px;color:var(--text-muted);">${u.email}</div></td>
-                    <td>${Number(u.budget).toLocaleString()}</td>
-                    <td style="color: ${isExceed ? 'var(--accent-2)' : 'white'}; font-weight:bold;">${Number(monthUsed).toLocaleString()}</td>
-                    <td>${statusTag}</td>
-                    <td>
-                        <div style="display:flex; gap:10px;">
+                html += `<tr>
+                    <td data-label="${dStr.thAdName}"><div><div><b>${u.name}</b></div><div style="font-size:11px;color:var(--text-muted);">${u.email}</div></div></td>
+                    <td data-label="${dStr.thAdBudget}">${Number(u.budget).toLocaleString()}</td>
+                    <td data-label="${dStr.thAdUsed}" style="color: ${isExceed ? 'var(--accent-2)' : 'white'}; font-weight:bold;">${Number(monthUsed).toLocaleString()}</td>
+                    <td data-label="${dStr.thAdStatus}">${statusTag}</td>
+                    <td data-label="${dStr.thAdTeam}">
+                        <div class="team-setup" style="display:flex; gap:10px;">
                             <select id="team_${u.email}" class="form-control" style="padding:6px; min-width: 120px;">${selectOptions}</select>
                             <button class="btn-neon" style="margin:0; padding:6px 12px; width:auto; font-size:12px;" onclick="saveTeam('${safeEmail}')">${dStr.btnSave}</button>
                         </div>
                     </td>
                 </tr>`;
             });
+            tbody.innerHTML = html;
         }
 
         async function saveTeam(email) {
@@ -649,14 +873,15 @@
         }
 
         function renderChart() {
+            if (typeof Chart === 'undefined') return;
             const mFilter = document.getElementById('adminChartMonth').value;
             const yFilter = document.getElementById('adminChartYear').value;
             const tFilter = document.getElementById('adminChartTeam').value;
             const ctx = document.getElementById('budgetChart').getContext('2d');
             if(budgetChartInstance) budgetChartInstance.destroy();
-            
+
             const filteredUsers = adminData.users.filter(u => tFilter === "all" || u.team === tFilter);
-            
+
             const labels = [];
             const budgetLine = [];
             const usedBars = [];
@@ -664,24 +889,10 @@
             filteredUsers.forEach(u => {
                 labels.push(u.name.split(' ')[0]);
                 budgetLine.push(u.budget);
-                
-                let monthUsed = 0;
-                const uEmail = (u.email || "").toLowerCase().trim();
-                const uName = (u.name || "").toLowerCase().replace(/\s+/g, '');
-
-                adminData.allTransactions.forEach(t => {
-                    const tEmail = (t.email || "").toLowerCase().trim();
-                    const tName = (t.name || "").toLowerCase().replace(/\s+/g, '');
-                    
-                    const isMatch = (tEmail && tEmail === uEmail) || (tName && tName === uName);
-                    
-                    if (isMatch && isMatchMonthTag(t.monthTag, mFilter, yFilter)) {
-                        monthUsed += Number(t.points || 0);
-                    }
-                });
-                
-                usedBars.push(monthUsed);
+                usedBars.push(calcUserUsed(u, mFilter, yFilter));
             });
+
+            const isMobile = window.innerWidth <= 768;
 
             budgetChartInstance = new Chart(ctx, {
                 type: 'bar',
@@ -694,8 +905,8 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, color: '#a0a0b0',
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0a0b0' } }, x: { grid: { display: false }, ticks: { color: '#a0a0b0' } } },
-                    plugins: { legend: { labels: { color: '#ffffff' } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0a0b0', font: { size: isMobile ? 10 : 12 } } }, x: { grid: { display: false }, ticks: { color: '#a0a0b0', font: { size: isMobile ? 10 : 12 } } } },
+                    plugins: { legend: { labels: { color: '#ffffff', boxWidth: isMobile ? 12 : 40, font: { size: isMobile ? 11 : 12 } } } }
                 }
             });
         }
